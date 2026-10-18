@@ -1,9 +1,42 @@
-from listener.listener import Listener
+from Listener.listener import Listener
 from fastapi import FastAPI
+import hmac
+import hashlib
+import json
 
-listener = Listener()
+
 app = FastAPI()
 
+SECRET_KEY = b"f1_paddock_secure_key_2026"
+
+listener = Listener()
+
+@app.get("/secure/telemetry/{index}")
+def get_secure_telemetry(index: int):
+    # Récupération des données brutes du jeu via le listener
+    packet = listener.listen()
+    car_data = packet.car_telemetry_data[index]
+    
+    # Construction du payload de télémétrie à sécuriser
+    payload = {
+        "speed": car_data.speed,
+        "throttle": car_data.throttle,
+        "brake": car_data.brake,
+        "gear": car_data.gear,
+        "engine_temperature": car_data.engine_temperature
+    }
+    
+    # Génération de la signature HMAC-SHA256
+    # On convertit le dictionnaire en chaîne JSON triée pour garantir l'uniformité
+    payload_bytes = json.dumps(payload, sort_keys=True).encode('utf-8')
+    signature = hmac.new(SECRET_KEY, payload_bytes, hashlib.sha256).hexdigest()
+    
+    # On retourne le paquet sécurisé contenant les données et le sceau cryptographique
+    return {
+        "status": "success",
+        "payload": payload,
+        "hmac_signature": signature
+    }
 
 @app.get("/speed/{index}")
 def get_speed(index: int) -> int:
