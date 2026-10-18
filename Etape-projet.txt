@@ -1,0 +1,41 @@
+Étape 1 : Activer la sortie UDP dans F1 24
+Avant de coder, il faut dire au jeu d'envoyer ses données sur votre réseau.
+
+Lancez F1 24 et allez dans les Paramètres du jeu (Settings).
+
+Cherchez l'onglet Télémesure UDP (UDP Telemetry).
+
+Activez l'option UDP Telemetry (Activé / On).
+
+Notez ou configurez :
+
+Port UDP : Souvent par défaut 20777 (ou celui de votre choix).
+
+Adresse IP de diffusion : Généralement 127.0.0.1 (votre propre PC) ou l'IP locale de votre machine si vous séparez le jeu et le script sur deux machines différentes (ex: un Raspberry Pi ou un second PC).
+
+Taux d'envoi UDP : Mettez-le au maximum (ex: 60Hz) pour avoir un flux de données riche.
+
+Étape 2 : Capter et décoder le flux avec Python
+Vous allez écrire un script Python qui écoute ce port UDP, récupère les paquets bruts, et les décode (les jeux F1 envoient des structures de données très précises : Header, Car Telemetry, Motion, Lap Data, etc.).
+
+Astuce de développeur : Il existe déjà des bibliothèques Open Source prêtes à l'emploi sur GitHub pour décoder la télémétrie des jeux F1 (cherchez par exemple f1-telemetry ou pyf1 en Python). Cela vous évite de recoder toute la structure binaire à la main.
+
+Étape 3 : Sécuriser le pipeline (La partie Cybersécurité)
+C'est ici que votre projet devient un projet de cyber et non plus juste un jeu vidéo :
+
+Intégrité des paquets (HMAC / Signature) :
+
+Imaginez que le script Python transmet ces données à un tableau de bord distant (simulant le muret des stands à l'usine).
+
+Ajoutez une signature cryptographique (HMAC avec une clé secrète) sur chaque paquet sortant pour prouver qu'il provient bien de la "voiture" et qu'il n'a pas été intercepté.
+
+Détection d'anomalies / Intrusion (IDS maison) :
+
+Codez une règle simple : si la température de l'huile ou la pression d'un pneu change de manière aberrante ou subite sans que le jeu ne l'ait réellement envoyé (simulation d'une attaque de type Man-in-the-Middle où un pirate modifie les données en vol), le système déclenche une alerte rouge de sécurité ("Alerte : Altération de la télémesure détectée !").
+
+Étape 4 : Créer un Dashboard "Mission Control"
+Pour que le projet ait de la gueule sur votre CV et votre LinkedIn :
+
+Envoyez vos données décodées et vérifiées vers un mini tableau de bord web (en utilisant Streamlit en Python, qui est très rapide à mettre en place, ou Grafana).
+
+Affichez d'un côté la télémétrie en direct (vitesse, tours par minute) et de l'autre un panneau de sécurité montrant l'état du chiffrement (ex: TLS/HMAC actif) et le journal des alertes de sécurité en temps réel.
